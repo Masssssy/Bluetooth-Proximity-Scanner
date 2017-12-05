@@ -15,7 +15,7 @@ def main():
 class ProxScanner(object):
     
     # SETTINGS #
-    username1 = "Massy"
+    username1 = "Martin"
     authentication = True
     mac = ""
     url = ""
@@ -37,7 +37,7 @@ class ProxScanner(object):
            val = "ON"
         while True:
             try:
-                r= requests.post("http://xx.com/rest/items/", data=val.encode('utf-8'), headers={'Content-type' : 'text/plain; charset=utf-8'})
+                r= requests.post("URLHERE", data=val.encode('utf-8'), headers={'Content-type' : 'text/plain; charset=utf-8'})
                 print ("Successfully updated with API request")
             except Exception as e:
                 print("Failed to connect to API, retrying....")
@@ -49,7 +49,7 @@ class ProxScanner(object):
     def run(self):
         while True:
             print "Looking for device at " + time.strftime("%a, %d %b %Y %H:%M:%S", time.gmtime())
-            result = bluetooth.lookup_name(mac, timeout=5)
+            result = bluetooth.lookup_name('MACADR', timeout=5)
             if (result != None):
                 if self.authenticated == False and self.authentication == True:
                     #Need to authenticate
@@ -57,6 +57,7 @@ class ProxScanner(object):
                     try:
                         output = subprocess.check_output(self.command, stderr=subprocess.STDOUT, shell=True)
                         self.authenticated = True
+                        self.disconnects = 0
                         print self.username1 + ": Successfully authenticated"
                         self.sendUpdate(True)
                     except subprocess.CalledProcessError as e:
@@ -64,6 +65,7 @@ class ProxScanner(object):
                         print(e)
                 else:
                 #Already authenticated OR no need for authentication
+                    self.disconnects = 0
                     if self.authentication == True:
                         print self.username1 + ": Not left since last authentication, keep status as authenticated"
                     else: 
@@ -75,6 +77,8 @@ class ProxScanner(object):
                     print "Deauth"
                     self.authenticated = False
                     self.sendUpdate(False)
-
-            time.sleep(self.scanDelay)
+            if(self.authenticated == True):
+                time.sleep(self.scanDelay)
+            else:
+                time.sleep(1)
 main()
